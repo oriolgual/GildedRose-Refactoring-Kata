@@ -6,8 +6,8 @@ class GildedRose
   def update_quality
     @items.each do |item|
       next if immutable_item?(item)
-      make_day_pass(item)
       update_item_at_end_of_day(item)
+      make_day_pass(item)
       update_item_after_sell_date(item)
     end
   end
@@ -72,8 +72,8 @@ class GildedRose
     item.quality += 1
 
     if backstage_ticket?(item)
-      item.quality += 1 if item.sell_in < 10
-      item.quality += 1 if item.sell_in < 5
+      item.quality += 1 if item.sell_in <= 10
+      item.quality += 1 if item.sell_in <= 5
     end
   end
 end
