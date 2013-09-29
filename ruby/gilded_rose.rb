@@ -3,40 +3,32 @@ class GildedRose
     @items = items
   end
 
-  def update_quality()
+  def update_quality
     @items.each do |item|
       next if immutable_item?(item)
-
-      if regular_item?(item)
-        decrease_quality(item)
-        decrease_quality(item) if conjured_item?(item)
-      elsif can_increase_quality?(item)
-        increase_quality(item)
-
-        if backstage_ticket?(item)
-          increase_quality(item) if item.sell_in < 11
-          increase_quality(item) if item.sell_in < 6
-        end
-      end
-
       make_day_pass(item)
-
-      if sell_date_passed?(item)
-        if backstage_ticket?(item)
-          reset_quality(item)
-        elsif aged_brie?(item)
-          increase_quality(item)
-        elsif regular_item?(item)
-          decrease_quality(item)
-          decrease_quality(item) if conjured_item?(item)
-        end
-      end
+      update_item_at_end_of_day(item)
+      update_item_after_sell_date(item)
     end
   end
 
   private
-  def make_day_pass(item)
-    item.sell_in -= 1
+  def update_item_at_end_of_day(item)
+    if regular_item?(item)
+      decrease_quality(item)
+    else
+      increase_quality(item)
+    end
+  end
+
+  def update_item_after_sell_date(item)
+    return unless sell_date_passed?(item)
+
+    if aged_brie?(item)
+      increase_quality(item)
+    else
+      decrease_quality(item)
+    end
   end
 
   def immutable_item?(item)
@@ -59,26 +51,30 @@ class GildedRose
     !(aged_brie?(item) || backstage_ticket?(item))
   end
 
+  def sell_date_passed?(item)
+    item.sell_in < 0
+  end
+
+  def make_day_pass(item)
+    item.sell_in -= 1
+  end
+
   def decrease_quality(item)
     return if item.quality == 0
+
     item.quality -= 1
+    item.quality -= 1 if conjured_item?(item)
+    item.quality = 0  if backstage_ticket?(item)
   end
 
   def increase_quality(item)
     return if item.quality == 50
     item.quality += 1
-  end
 
-  def reset_quality(item)
-    item.quality = 0
-  end
-
-  def sell_date_passed?(item)
-    item.sell_in < 0
-  end
-
-  def can_increase_quality?(item)
-    !regular_item?(item) && item.quality < 50
+    if backstage_ticket?(item)
+      item.quality += 1 if item.sell_in < 10
+      item.quality += 1 if item.sell_in < 5
+    end
   end
 end
 
