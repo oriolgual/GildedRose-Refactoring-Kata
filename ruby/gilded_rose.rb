@@ -1,4 +1,3 @@
-
 class GildedRose
   def initialize(items)
     @items = items
@@ -10,6 +9,7 @@ class GildedRose
 
       if regular_item?(item)
         decrease_quality(item)
+        decrease_quality(item) if conjured_item?(item)
       elsif can_increase_quality?(item)
         increase_quality(item)
 
@@ -28,6 +28,7 @@ class GildedRose
           increase_quality(item)
         elsif regular_item?(item)
           decrease_quality(item)
+          decrease_quality(item) if conjured_item?(item)
         end
       end
     end
@@ -48,6 +49,10 @@ class GildedRose
 
   def aged_brie?(item)
     item.name == "Aged Brie"
+  end
+
+  def conjured_item?(item)
+    item.name =~ /Conjured/
   end
 
   def regular_item?(item)
